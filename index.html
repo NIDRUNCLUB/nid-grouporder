@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NID Run Club｜團購</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-card: #141414;
+    --bg-elev: #1c1c1c;
+    --bg-elev2: #242424;
+    --ink: #f4f4f0;
+    --ink-dim: #8a8a85;
+    --ink-faint: #5a5a55;
+    --line: #2a2a2a;
+    --accent: #FEE100;
+    --accent-2: #FF9500;
+    --accent-3: #FFB627;
+    --danger: #ff3a5e;
+    --display: 'Anton', 'Bebas Neue', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --tc: 'Noto Sans TC', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--tc);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:''; position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(254,225,0,.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(255,149,0,.06), transparent 45%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content:''; position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px);
+    pointer-events: none; z-index: 1; mix-blend-mode: overlay;
+  }
+  .wrap { position: relative; z-index: 2; max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  header {
+    padding: 36px 0 24px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 12px; color: var(--ink-dim);
+    letter-spacing: .15em; text-transform: uppercase;
+  }
+  .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(48px, 9vw, 96px);
+    line-height: .9; letter-spacing: -.01em;
+    margin-top: 14px; text-transform: uppercase;
+  }
+  h1 .strike { color: var(--accent); }
+  h1 .o { display:inline-block; color: transparent; -webkit-text-stroke: 2px var(--ink); }
+
+  .subtitle {
+    margin-top: 14px;
+    font-family: var(--mono); font-size: 13px;
+    color: var(--ink-dim); letter-spacing: .05em;
+  }
+  .subtitle b { color: var(--accent); font-weight: 700; }
+
+  .meta-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--line); border: 1px solid var(--line);
+    margin-top: 24px;
+  }
+  .meta-strip > div { background: var(--bg); padding: 12px 14px; }
+  .meta-strip .k { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); letter-spacing: .15em; text-transform: uppercase; }
+  .meta-strip .v { font-family: var(--mono); font-size: 14px; color: var(--ink); margin-top: 4px; font-weight: 700; }
+
+  /* ── LOADING ───────────────────────────────────────── */
+  .loading-screen {
+    padding: 60px 0; text-align: center;
+    font-family: var(--mono); color: var(--ink-dim);
+    font-size: 13px; letter-spacing: .1em;
+  }
+  .loading-screen .spinner {
+    display: inline-block;
+    width: 32px; height: 32px;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-screen {
+    padding: 40px 24px;
+    background: rgba(255,58,94,.08);
+    border: 1px solid var(--danger);
+    margin: 30px 0;
+    font-family: var(--mono); font-size: 13px;
+    color: var(--danger);
+    line-height: 1.7;
+  }
+  .error-screen b { color: #fff; }
+
+  /* ── CATEGORY ──────────────────────────────────────── */
+  .cat-block { margin-top: 40px; }
+  .cat-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 6px;
+  }
+  .cat-head .num {
+    font-family: var(--display); font-size: 28px; line-height: 1;
+  }
+  .cat-head .num.c0 { color: var(--accent); }
+  .cat-head .num.c1 { color: var(--accent-2); }
+  .cat-head .num.c2 { color: var(--accent-3); }
+  .cat-head .num.c3 { color: var(--accent); }
+  .cat-head h2 {
+    font-family: var(--display); font-size: 28px;
+    letter-spacing: .02em; text-transform: uppercase; font-weight: 400;
+  }
+  .cat-head .line { flex: 1; height: 1px; background: var(--line); }
+  .cat-desc {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-dim); margin-bottom: 16px;
+    letter-spacing: .03em;
+  }
+
+  /* ── BRAND CARDS ───────────────────────────────────── */
+  .brands { display: grid; gap: 12px; }
+  .brand-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    transition: border-color .2s;
+  }
+  .brand-card.has-items { border-color: var(--accent); }
+  .brand-card.has-items .brand-head { background: linear-gradient(90deg, rgba(254,225,0,.06), transparent); }
+
+  .brand-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+  .brand-head:hover { background: var(--bg-elev); }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-size: 18px;
+    color: var(--accent); letter-spacing: 0;
+    flex-shrink: 0;
+  }
+  .brand-card.has-items .brand-icon {
+    background: var(--accent); color: #000; border-color: var(--accent);
+  }
+  .brand-info { flex: 1; min-width: 0; }
+  .brand-name {
+    font-weight: 700; font-size: 16px; line-height: 1.3;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .brand-desc {
+    color: var(--ink-dim); font-size: 12px; margin-top: 3px;
+  }
+  .brand-meta {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .info-link {
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-family: var(--mono); font-size: 11px;
+    border: 1px solid var(--line);
+    padding: 5px 9px;
+    transition: all .15s;
+    letter-spacing: .05em;
+  }
+  .info-link:hover {
+    color: var(--accent); border-color: var(--accent);
+  }
+  .selected-badge {
+    background: var(--accent); color: #000;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    padding: 4px 8px;
+    display: none;
+  }
+  .brand-card.has-items .selected-badge { display: inline-block; }
+
+  .chev {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-dim);
+    transition: transform .2s;
+    font-size: 14px;
+  }
+  .brand-card.open .chev { transform: rotate(180deg); color: var(--accent); }
+
+  .items {
+    display: none;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .brand-card.open .items { display: block; }
+  .item {
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .item:last-child { border-bottom: 0; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-size: 14px; font-weight: 500; line-height: 1.35; }
+  .item-spec { color: var(--ink-dim); font-size: 12px; margin-top: 2px; }
+  .item-prices {
+    display: flex; align-items: baseline; gap: 8px; margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .price-now {
+    font-family: var(--mono); font-weight: 700; font-size: 16px;
+    color: var(--accent);
+  }
+  .price-old {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-faint); text-decoration: line-through;
+  }
+  .save {
+    font-family: var(--mono); font-size: 10px;
+    background: var(--accent-2); color: #000;
+    padding: 1px 5px; font-weight: 700; letter-spacing: .03em;
+  }
+
+  .qty {
+    display: flex; align-items: center;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+  .qty button {
+    width: 34px; height: 34px;
+    background: transparent; border: 0; color: var(--ink);
+    font-family: var(--mono); font-size: 16px; cursor: pointer;
+    transition: all .15s;
+  }
+  .qty button:hover { background: var(--bg-elev); color: var(--accent); }
+  .qty input {
+    width: 40px; height: 34px; text-align: center;
+    background: transparent; border: 0; color: var(--ink);
+    font-family: var(--mono); font-weight: 700; font-size: 14px;
+    border-left: 1px solid var(--line); border-right: 1px solid var(--line);
+  }
+  .qty input:focus { outline: 0; background: var(--bg-elev); }
+  .qty input[type=number]::-webkit-inner-spin-button,
+  .qty input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .qty input[type=number] { -moz-appearance: textfield; }
+
+  .summary {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-elev));
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-top: 30px;
+    position: relative;
+  }
+  .summary::before {
+    content:''; position: absolute; top: -1px; left: -1px; right: -1px;
+    height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .summary-lines {
+    display: flex; flex-direction: column; gap: 6px;
+    font-family: var(--mono); font-size: 13px;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 14px; margin-bottom: 14px;
+    color: var(--ink-dim);
+    max-height: 260px; overflow-y: auto;
+  }
+  .summary-lines .row { display: flex; justify-content: space-between; gap: 12px; }
+  .summary-lines .row .name { color: var(--ink); flex: 1; min-width: 0; }
+  .summary-lines .empty { color: var(--ink-dim); font-style: italic; text-align: center; padding: 8px 0; }
+
+  .total-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .total-row .lbl {
+    font-family: var(--display); font-size: 22px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .total-row .amt {
+    font-family: var(--display); font-size: 44px;
+    color: var(--accent);
+    letter-spacing: -.01em; line-height: 1;
+  }
+  .total-row .amt::before { content:'NT$ '; font-size: 18px; color: var(--ink-dim); }
+
+  .section-title {
+    display: flex; align-items: baseline; gap: 12px;
+    margin: 40px 0 18px;
+  }
+  .section-title .num {
+    font-family: var(--display); font-size: 28px; color: var(--accent); line-height: 1;
+  }
+  .section-title h2 {
+    font-family: var(--display); font-size: 28px; letter-spacing: .02em;
+    text-transform: uppercase; font-weight: 400;
+  }
+  .section-title .line { flex: 1; height: 1px; background: var(--line); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-dim); letter-spacing: .12em; text-transform: uppercase;
+  }
+  label .req { color: var(--accent-2); }
+  input[type=text], input[type=tel], select {
+    background: var(--bg-card); border: 1px solid var(--line);
+    color: var(--ink); padding: 12px 14px;
+    font-family: var(--tc); font-size: 15px;
+    transition: border-color .15s, background .15s;
+  }
+  input:focus, select:focus {
+    outline: 0; border-color: var(--accent); background: var(--bg-elev);
+  }
+  input::placeholder { color: #4a4a45; }
+  .hint {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-dim);
+    margin-top: 2px;
+  }
+
+  .submit-area { margin-top: 32px; }
+  .submit {
+    width: 100%; background: var(--accent); color: #000; border: 0;
+    padding: 20px;
+    font-family: var(--display); font-size: 24px;
+    letter-spacing: .08em; text-transform: uppercase;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: transform .15s, background .2s;
+  }
+  .submit:hover:not(:disabled) { background: #FFEC4D; transform: translateY(-2px); }
+  .submit:active { transform: translateY(0); }
+  .submit:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+  .submit .arrow { display: inline-block; transition: transform .25s; margin-left: 8px; }
+  .submit:hover:not(:disabled) .arrow { transform: translateX(6px); }
+  .submit.loading { color: transparent; }
+  .submit.loading::after {
+    content:''; position: absolute; top: 50%; left: 50%;
+    width: 22px; height: 22px;
+    border: 3px solid #000; border-top-color: transparent;
+    border-radius: 50%; transform: translate(-50%,-50%);
+    animation: spin .8s linear infinite;
+  }
+
+  .modal-bg {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    max-width: 480px; width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    padding: 32px;
+    text-align: center;
+    position: relative;
+  }
+  .modal::before {
+    content:''; position: absolute; top: -1px; left: -1px; right: -1px;
+    height: 4px; background: var(--accent);
+  }
+  .modal .check {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent); color: #000;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; font-size: 28px; font-weight: 900;
+  }
+  .modal h3 {
+    font-family: var(--display); font-size: 30px;
+    letter-spacing: .04em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .modal p {
+    color: var(--ink-dim); font-size: 14px; line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .modal .order-no {
+    font-family: var(--mono); color: var(--accent);
+    background: var(--bg); padding: 8px 14px;
+    display: inline-block; margin: 8px 0 20px;
+    border: 1px dashed var(--line); font-size: 13px;
+  }
+  .modal a.line-btn {
+    display: block;
+    background: #06c755; color: #fff;
+    padding: 16px;
+    font-family: var(--display); font-size: 18px;
+    letter-spacing: .06em; text-transform: uppercase;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .modal a.line-btn:hover { background: #05a847; }
+
+  .err-banner {
+    display: none;
+    background: rgba(255,58,94,.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 16px;
+    font-family: var(--mono);
+  }
+  .err-banner.show { display: block; }
+
+  footer {
+    margin-top: 60px; padding: 30px 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-dim); letter-spacing: .1em;
+    text-align: center;
+  }
+  footer .lines {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  footer .lines span { width: 30px; height: 1px; background: var(--line); }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .meta-strip { grid-template-columns: 1fr; }
+    h1 { font-size: 56px; }
+    .total-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .brand-head { padding: 14px; gap: 10px; }
+    .brand-icon { width: 38px; height: 38px; font-size: 14px; }
+    .item { flex-wrap: wrap; padding: 12px 14px; }
+    .item-info { flex-basis: 100%; }
+    .qty { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand"><span class="dot"></span>NID RUN CLUB · GROUP ORDER</div>
+    <h1>RUN<span class="o">N</span>ER&apos;S<br><span class="strike">FUEL</span> SHOP</h1>
+    <div class="subtitle">NID Run Club 學生專屬團購 · <b>限時優惠</b></div>
+
+        <div class="meta-strip">
+      <div><div class="k">Round</div><div class="v" id="metaRound">— —</div></div>
+      <div><div class="k">Deadline</div><div class="v" id="metaDeadline">— —</div></div>
+      <div><div class="k">Pickup</div><div class="v" id="metaPickup">— —</div></div>
+    </div>
+  </header>
+
+  <!-- 載入中 -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div>LOADING CATALOG...</div>
+  </div>
+
+  <!-- 錯誤 -->
+  <div class="error-screen" id="errorScreen" style="display:none"></div>
+
+  <!-- 商品 -->
+  <div id="catalog" style="display:none"></div>
+
+  <!-- SUMMARY -->
+  <div id="summaryWrap" style="display:none">
+    <div class="section-title">
+      <span class="num">$</span>
+      <h2>訂單總計</h2>
+      <span class="line"></span>
+    </div>
+
+    <div class="summary">
+      <div class="summary-lines" id="summaryLines">
+        <div class="empty">尚未選擇商品</div>
+      </div>
+      <div class="total-row">
+        <div class="lbl">Total</div>
+        <div class="amt" id="totalAmount">0</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span class="num">✎</span>
+      <h2>下單資訊</h2>
+      <span class="line"></span>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="name">姓名 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="王小明" />
+      </div>
+      <div class="field">
+        <label for="phone">電話 <span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="0912-345-678" />
+      </div>
+      <div class="field">
+        <label for="classname">班級 <span class="req">*</span></label>
+        <input type="text" id="classname" placeholder="例：資管三A" />
+      </div>
+      <div class="field">
+        <label for="last5">匯款後五碼 <span class="req">*</span></label>
+        <input type="text" id="last5" placeholder="12345" maxlength="5" inputmode="numeric" />
+        <div class="hint">請先完成匯款後再下單</div>
+      </div>
+      <div class="field full">
+        <label for="note">備註 (選填)</label>
+        <input type="text" id="note" placeholder="尺寸、口味、其他需求..." />
+      </div>
+    </div>
+
+    <div class="err-banner" id="errBanner"></div>
+
+    <div class="submit-area">
+      <button class="submit" id="submitBtn" disabled>
+        送出訂單 <span class="arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="lines"><span></span>KEEP RUNNING<span></span></div>
+    NID RUN CLUB · 2026 · POWERED BY THE PACE
+  </footer>
+
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="check">✓</div>
+    <h3>訂單已送出</h3>
+    <p>感謝你的下單！</p>
+    <div class="order-no" id="orderNo">#NID-000000</div>
+    <p>請點擊下方按鈕加入 <b style="color:#06c755">NID 官方 LINE</b><br>主辦人會與你確認匯款狀態</p>
+    <a class="line-btn" href="https://lin.ee/Wsdtetl" target="_blank" rel="noopener">
+      前往 LINE 確認匯款 →
+    </a>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ⚙ 只要改這一行：貼上你的 Google Apps Script 部署網址
+═══════════════════════════════════════════════════════════ */
+const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwlUVzwOO66svVI8xgInNZ_cXNcfrm_2H0qWLTGvmOrFAbaryW7d_mpvTOUhpUH5WggKg/exec';
+
+/* ═══════════════════════════════════════════════════════════
+   📦 狀態
+═══════════════════════════════════════════════════════════ */
+let CATALOG = [];
+let ROUND_INFO = { round: '— —', deadline: '— —', pickup: '— —' };
+const qtyMap = {};
+const itemLookup = {};
+
+/* ═══════════════════════════════════════════════════════════
+   🌐 從 Google Sheet 讀商品
+═══════════════════════════════════════════════════════════ */
+async function loadCatalog() {
+  if (!GAS_ENDPOINT) {
+    showFatalError(
+      '⚠️ <b>尚未設定 Google Sheet 連線</b><br><br>' +
+      '請打開這個 HTML 檔案，找到最上方的<br>' +
+      '<code style="color:#fff">const GAS_ENDPOINT = \'\';</code><br><br>' +
+      '把你的 Google Apps Script 部署網址貼進單引號內。<br>' +
+      '詳細步驟請看「設定教學.md」'
+    );
+    return;
+  }
+
+  try {
+    const url = GAS_ENDPOINT + '?action=getCatalog&t=' + Date.now();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || '未知錯誤');
+
+    CATALOG = data.catalog || [];
+    ROUND_INFO = data.round || ROUND_INFO;
+
+    // build lookup
+    CATALOG.forEach(cat => cat.brands.forEach(b => b.items.forEach(it => {
+      itemLookup[it.id] = { item: it, brand: b, cat };
+    })));
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('catalog').style.display = 'block';
+    document.getElementById('summaryWrap').style.display = 'block';
+    renderMeta();
+    renderCatalog();
+    renderSummary();
+  } catch (err) {
+    showFatalError(
+      '⚠️ <b>無法載入商品資料</b><br><br>' +
+      '錯誤訊息：' + err.message + '<br><br>' +
+      '請檢查：<br>' +
+      '1. Google Apps Script 是否已部署為「網路應用程式」<br>' +
+      '2. 部署設定「誰可以存取」是否選「任何人」<br>' +
+      '3. GAS_ENDPOINT 網址是否正確'
+    );
+  }
+}
+
+function showFatalError(html) {
+  document.getElementById('loadingScreen').style.display = 'none';
+  const err = document.getElementById('errorScreen');
+  err.innerHTML = html;
+  err.style.display = 'block';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🎨 Render
+═══════════════════════════════════════════════════════════ */
+function renderMeta() {
+  document.getElementById('metaRound').textContent = ROUND_INFO.round;
+  document.getElementById('metaDeadline').textContent = ROUND_INFO.deadline;
+  document.getElementById('metaPickup').textContent = ROUND_INFO.pickup;
+}
+
+function renderCatalog() {
+  const root = document.getElementById('catalog');
+  root.innerHTML = '';
+
+  if (CATALOG.length === 0) {
+    root.innerHTML = '<div class="error-screen">目前沒有上架的商品</div>';
+    return;
+  }
+
+  CATALOG.forEach((cat, idx) => {
+    const catEl = document.createElement('div');
+    catEl.className = 'cat-block';
+    catEl.innerHTML = `
+      <div class="cat-head">
+        <span class="num c${idx % 4}">0${idx+1}</span>
+        <h2>${escapeHtml(cat.name)}</h2>
+        <span class="line"></span>
+      </div>
+      ${cat.desc ? `<div class="cat-desc">${escapeHtml(cat.desc)}</div>` : ''}
+      <div class="brands" data-cat="${cat.id}"></div>
+    `;
+    const brandsEl = catEl.querySelector('.brands');
+
+    cat.brands.forEach(brand => {
+      const card = document.createElement('div');
+      card.className = 'brand-card';
+      card.dataset.brand = brand.id;
+      card.innerHTML = `
+        <div class="brand-head">
+          <div class="brand-icon">${escapeHtml(brand.shortcode || brand.name.slice(0,2))}</div>
+          <div class="brand-info">
+            <div class="brand-name">${escapeHtml(brand.name)}<span class="selected-badge">已選</span></div>
+            <div class="brand-desc">${escapeHtml(brand.tagline || '')}</div>
+          </div>
+          <div class="brand-meta">
+            ${brand.infoUrl
+              ? `<a class="info-link" href="${escapeHtml(brand.infoUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">ⓘ 介紹</a>`
+              : ''}
+            <div class="chev">▼</div>
+          </div>
+        </div>
+        <div class="items"></div>
+      `;
+      const itemsEl = card.querySelector('.items');
+      brand.items.forEach(it => {
+        const save = (it.original || 0) - it.price;
+        const savePct = it.original ? Math.round(save / it.original * 100) : 0;
+        const itemEl = document.createElement('div');
+        itemEl.className = 'item';
+        itemEl.innerHTML = `
+          <div class="item-info">
+            <div class="item-name">${escapeHtml(it.name)}</div>
+            ${it.spec ? `<div class="item-spec">${escapeHtml(it.spec)}</div>` : ''}
+            <div class="item-prices">
+              <span class="price-now">NT$ ${it.price}</span>
+              ${it.original ? `<span class="price-old">NT$ ${it.original}</span>` : ''}
+              ${save > 0 ? `<span class="save">省 ${savePct}%</span>` : ''}
+            </div>
+          </div>
+          <div class="qty" data-item="${it.id}">
+            <button data-act="dec">−</button>
+            <input type="number" min="0" value="0" data-input="${it.id}" />
+            <button data-act="inc">+</button>
+          </div>
+        `;
+        itemsEl.appendChild(itemEl);
+      });
+
+      card.querySelector('.brand-head').addEventListener('click', e => {
+        if (e.target.closest('.info-link')) return;
+        card.classList.toggle('open');
+      });
+
+      brandsEl.appendChild(card);
+    });
+
+    root.appendChild(catEl);
+  });
+
+  // qty
+  root.querySelectorAll('.qty button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const parent = btn.closest('.qty');
+      const id = parent.dataset.item;
+      const cur = qtyMap[id] || 0;
+      qtyMap[id] = btn.dataset.act === 'inc' ? cur + 1 : Math.max(0, cur - 1);
+      parent.querySelector('input').value = qtyMap[id];
+      onQtyChange();
+    });
+  });
+  root.querySelectorAll('.qty input').forEach(inp => {
+    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('input', e => {
+      const id = e.target.dataset.input;
+      qtyMap[id] = Math.max(0, parseInt(e.target.value) || 0);
+      onQtyChange();
+    });
+  });
+}
+
+function onQtyChange() {
+  renderSummary();
+  CATALOG.forEach(cat => cat.brands.forEach(brand => {
+    const card = document.querySelector(`[data-brand="${brand.id}"]`);
+    if (!card) return;
+    const hasItems = brand.items.some(it => (qtyMap[it.id] || 0) > 0);
+    card.classList.toggle('has-items', hasItems);
+  }));
+}
+
+function renderSummary() {
+  const lines = document.getElementById('summaryLines');
+  const totalEl = document.getElementById('totalAmount');
+  let total = 0, hasItem = false, html = '';
+  Object.keys(qtyMap).forEach(id => {
+    const q = qtyMap[id];
+    if (q > 0 && itemLookup[id]) {
+      hasItem = true;
+      const { item, brand } = itemLookup[id];
+      const subtotal = q * item.price;
+      total += subtotal;
+      html += `<div class="row">
+        <span class="name"><b style="color:var(--accent)">${escapeHtml(brand.shortcode || '')}</b> ${escapeHtml(item.name)} × ${q}</span>
+        <span>NT$ ${subtotal.toLocaleString()}</span>
+      </div>`;
+    }
+  });
+  if (!hasItem) html = '<div class="empty">尚未選擇商品</div>';
+  lines.innerHTML = html;
+  totalEl.textContent = total.toLocaleString();
+  document.getElementById('submitBtn').disabled = total === 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✉ 送出
+═══════════════════════════════════════════════════════════ */
+const submitBtn = document.getElementById('submitBtn');
+const errBanner = document.getElementById('errBanner');
+
+submitBtn.addEventListener('click', async () => {
+  errBanner.classList.remove('show');
+
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const classname = document.getElementById('classname').value.trim();
+  const last5 = document.getElementById('last5').value.trim();
+  const note = document.getElementById('note').value.trim();
+
+  if (!name || !phone || !classname || !last5) {
+    showError('請填寫所有必填欄位（姓名 / 電話 / 班級 / 匯款後五碼）');
+    return;
+  }
+  if (!/^\d{5}$/.test(last5)) {
+    showError('匯款後五碼必須是 5 位數字');
+    return;
+  }
+
+  const items = [];
+  let total = 0;
+  Object.keys(qtyMap).forEach(id => {
+    const q = qtyMap[id];
+    if (q > 0 && itemLookup[id]) {
+      const { item, brand, cat } = itemLookup[id];
+      items.push({
+        category: cat.name, brand: brand.name,
+        item: item.name, spec: item.spec || '',
+        qty: q, unitPrice: item.price, subtotal: item.price * q
+      });
+      total += item.price * q;
+    }
+  });
+
+  const orderNo = 'NID-' + Date.now().toString().slice(-6);
+  const payload = {
+    action: 'submitOrder',
+    orderNo,
+    timestamp: new Date().toISOString(),
+    name, phone, classname, last5, note,
+    items,
+    itemsText: items.map(i => `${i.brand}/${i.item}${i.spec?'('+i.spec+')':''} x${i.qty}`).join(' | '),
+    total
+  };
+
+  submitBtn.classList.add('loading');
+  submitBtn.disabled = true;
+
+  try {
+    await fetch(GAS_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    document.getElementById('orderNo').textContent = '#' + orderNo;
+    document.getElementById('modalBg').classList.add('open');
+
+    Object.keys(qtyMap).forEach(k => qtyMap[k] = 0);
+    document.querySelectorAll('.qty input').forEach(i => i.value = 0);
+    document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('has-items'));
+    ['name','phone','classname','last5','note'].forEach(id => document.getElementById(id).value = '');
+    renderSummary();
+  } catch (err) {
+    showError('送出失敗，請稍後再試或直接私訊 LINE 主辦人。' + err.message);
+  } finally {
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+  }
+});
+
+function showError(msg) {
+  errBanner.textContent = '⚠ ' + msg;
+  errBanner.classList.add('show');
+  errBanner.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+loadCatalog();
+</script>
+</body>
+</html>
