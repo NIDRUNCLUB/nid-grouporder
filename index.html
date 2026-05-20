@@ -474,6 +474,11 @@
         <label for="phone">電話 <span class="req">*</span></label>
         <input type="tel" id="phone" placeholder="0912-345-678" />
       </div>
+      <div class="field full">
+        <label for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="your@email.com" />
+        <div class="hint">訂單確認信會寄到這個信箱</div>
+      </div>
       <div class="field">
         <label for="region">所在區域 <span class="req">*</span></label>
         <select id="region">
@@ -521,7 +526,7 @@
     <h3>訂單已送出</h3>
     <p>感謝你的下單！</p>
     <div class="order-no" id="orderNo">#NID-000000</div>
-    <p>請點擊下方按鈕加入 <b style="color:#06c755">NID 官方 LINE</b><br>主辦人會與你確認匯款狀態</p>
+    <p>📬 訂單明細已寄到你的信箱<br><br>請點擊下方按鈕加入 <b style="color:#06c755">NID 官方 LINE</b><br>主辦人會與你確認匯款狀態</p>
     <a class="line-btn" href="https://lin.ee/Wsdtetl" target="_blank" rel="noopener">
       前往 LINE 確認匯款 →
     </a>
@@ -962,13 +967,18 @@ submitBtn.addEventListener('click', async () => {
 
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
   const region = document.getElementById('region').value;
   const classname = document.getElementById('classname').value;
   const last5 = document.getElementById('last5').value.trim();
   const note = document.getElementById('note').value.trim();
 
-  if (!name || !phone || !region || !classname || !last5) {
-    showError('請填寫所有必填欄位（姓名 / 電話 / 區域 / 班級 / 匯款後五碼）');
+  if (!name || !phone || !email || !region || !classname || !last5) {
+    showError('請填寫所有必填欄位（姓名 / 電話 / Email / 區域 / 班級 / 匯款後五碼）');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('Email 格式不正確，請確認');
     return;
   }
   if (!/^\d{5}$/.test(last5)) {
@@ -1003,7 +1013,7 @@ submitBtn.addEventListener('click', async () => {
     action: 'submitOrder',
     orderNo,
     timestamp: new Date().toISOString(),
-    name, phone, region, classname, last5, note,
+    name, phone, email, region, classname, last5, note,
     items,
     total
   };
@@ -1027,7 +1037,7 @@ submitBtn.addEventListener('click', async () => {
     document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('has-items'));
     document.querySelectorAll('.variant-row').forEach(r => r.classList.remove('has-qty'));
     document.querySelectorAll('.matrix-qty').forEach(c => c.classList.remove('has-qty'));
-    ['name','phone','last5','note'].forEach(id => document.getElementById(id).value = '');
+    ['name','phone','email','last5','note'].forEach(id => document.getElementById(id).value = '');
     regionEl.value = '';
     classEl.innerHTML = '<option value="">請先選擇區域</option>';
     classEl.disabled = true;
