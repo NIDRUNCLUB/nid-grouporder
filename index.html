@@ -83,6 +83,98 @@
   .brand-card.open .chev { transform: rotate(180deg); color: var(--accent); }
 
   .items { display: none; border-top: 1px solid var(--line); background: var(--bg); }
+  /* ── 介紹橫幅（展開後的引導）─────────────────── */
+  .info-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    background: linear-gradient(90deg, rgba(254,225,0,.12), rgba(254,225,0,.04));
+    border-bottom: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background .2s;
+    cursor: pointer;
+  }
+  .info-banner:hover {
+    background: linear-gradient(90deg, rgba(254,225,0,.2), rgba(254,225,0,.08));
+  }
+  .info-banner-text {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .info-banner-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .info-banner-cta {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent);
+    color: #000;
+    padding: 6px 12px;
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: gap .2s;
+  }
+  .info-banner:hover .info-banner-cta { gap: 10px; }
+  .info-banner-cta .arr {
+    display: inline-block;
+    transition: transform .2s;
+  }
+  .info-banner:hover .info-banner-cta .arr { transform: translateX(2px); }
+  /* ── 庫存顯示 ─────────────────────────────────── */
+  .stock-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    font-family: var(--mono); font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .stock-badge.low {
+    background: var(--accent-2); color: #000;
+  }
+  .stock-badge.normal {
+    background: var(--bg-elev2); color: var(--ink-dim);
+    border: 1px solid var(--line);
+  }
+  .stock-badge.out {
+    background: #3a1a1a; color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+  .variant-row.sold-out {
+    opacity: .45;
+    pointer-events: none;
+  }
+  .variant-row.sold-out .qty { display: none; }
+  .variant-row .sold-out-label {
+    display: none;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--danger); font-weight: 700;
+    letter-spacing: .1em;
+  }
+  .variant-row.sold-out .sold-out-label { display: inline; }
+  
+  /* 矩陣表格的售完處理 */
+  .matrix-cell-soldout {
+    color: var(--ink-faint);
+    font-family: var(--mono); font-size: 10px;
+    font-weight: 700;
+  }
+  .matrix-cell-stock {
+    font-family: var(--mono); font-size: 9px;
+    color: var(--accent-2); font-weight: 700;
+    margin-top: 3px;
+  }
+  .matrix-cell-stock.normal { color: var(--ink-faint); }
+
+
   .brand-card.open .items { display: block; }
 
   /* ── 品項區塊 ─────────────────────────────────── */
@@ -306,6 +398,9 @@
   footer .lines span { width: 30px; height: 1px; background: var(--line); }
 
   @media (max-width: 640px) {
+    .info-banner { padding: 10px 14px; flex-wrap: wrap; }
+    .info-banner-text { font-size: 12px; }
+    .info-banner-cta { font-size: 10px; padding: 5px 10px; }
     .form-grid { grid-template-columns: 1fr; }
     .meta-strip { grid-template-columns: 1fr; }
     h1 { font-size: 56px; }
@@ -505,6 +600,16 @@ function renderMeta() {
 }
 
 /* ═══════════════════════════════════════════════════════
+   庫存徽章
+═══════════════════════════════════════════════════════ */
+function renderStockBadge(v) {
+  if (!v.hasLimit) return '';
+  if (v.remaining <= 0) return '<span class="stock-badge out">SOLD OUT</span>';
+  if (v.remaining <= 3) return `<span class="stock-badge low">僅剩 ${v.remaining}</span>`;
+  return `<span class="stock-badge normal">剩 ${v.remaining}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
    價格範圍 → 顯示字串
 ═══════════════════════════════════════════════════════ */
 function getPriceDisplay(item) {
@@ -552,6 +657,15 @@ function renderCatalog() {
       const card = document.createElement('div');
       card.className = 'brand-card';
       card.dataset.brand = brand.id;
+      const infoBannerHtml = brand.infoUrl ? `
+        <a class="info-banner" href="${escapeHtml(brand.infoUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <div class="info-banner-text">
+            <span class="info-banner-icon">💡</span>
+            <span>還不熟悉 <b>${escapeHtml(brand.name)}</b>？查看完整品牌介紹、成分與使用時機</span>
+          </div>
+          <div class="info-banner-cta">看介紹 <span class="arr">↗</span></div>
+        </a>
+      ` : '';
       card.innerHTML = `
         <div class="brand-head">
           <div class="brand-icon">${escapeHtml(brand.shortcode || brand.name.slice(0,2))}</div>
@@ -564,7 +678,7 @@ function renderCatalog() {
             <div class="chev">▼</div>
           </div>
         </div>
-        <div class="items"></div>
+        <div class="items">${infoBannerHtml}</div>
       `;
       const itemsEl = card.querySelector('.items');
 
@@ -603,19 +717,26 @@ function renderCatalog() {
           `;
         } else if (isFlavor) {
           // ─── 口味列表 ───
-          let variantsHtml = item.variants.map(v => `
-            <div class="variant-row" data-variant-row="${v.id}">
-              <div class="variant-label">
-                <span class="variant-tag">${escapeHtml(v.opt1)}</span>
-                <span class="variant-price">NT$ ${v.price}</span>
+          let variantsHtml = item.variants.map(v => {
+            const stockHtml = renderStockBadge(v);
+            const soldOut = v.hasLimit && v.remaining <= 0;
+            const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
+            return `
+              <div class="variant-row ${soldOut ? 'sold-out' : ''}" data-variant-row="${v.id}">
+                <div class="variant-label">
+                  <span class="variant-tag">${escapeHtml(v.opt1)}</span>
+                  <span class="variant-price">NT$ ${v.price}</span>
+                  ${stockHtml}
+                  <span class="sold-out-label">已售完</span>
+                </div>
+                <div class="qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}">
+                  <button data-act="dec">−</button>
+                  <input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" />
+                  <button data-act="inc">+</button>
+                </div>
               </div>
-              <div class="qty" data-variant="${v.id}">
-                <button data-act="dec">−</button>
-                <input type="number" min="0" value="0" data-variant-input="${v.id}" />
-                <button data-act="inc">+</button>
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
 
           itemEl.innerHTML = `
             <div class="item-header">
@@ -646,19 +767,31 @@ function renderCatalog() {
             sizes.forEach(s => {
               const v = cellMap[c + '|' + s];
               if (v) {
-                // 是否價格不同於最低價
                 const minPrice = Math.min(...item.variants.map(x => x.price));
                 const priceDiff = v.price !== minPrice;
-                tableHtml += `
-                  <td>
-                    <div class="matrix-qty" data-variant="${v.id}">
-                      <button data-act="dec">−</button>
-                      <input type="number" min="0" value="0" data-variant-input="${v.id}" />
-                      <button data-act="inc">+</button>
-                    </div>
-                    ${priceDiff ? `<div class="price-note">+$${v.price - minPrice}</div>` : ''}
-                  </td>
-                `;
+                const soldOut = v.hasLimit && v.remaining <= 0;
+                const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
+                
+                if (soldOut) {
+                  tableHtml += `<td><div class="matrix-cell-soldout">售完</div></td>`;
+                } else {
+                  let stockNote = '';
+                  if (v.hasLimit) {
+                    const cls = v.remaining <= 3 ? '' : 'normal';
+                    stockNote = `<div class="matrix-cell-stock ${cls}">剩 ${v.remaining}</div>`;
+                  }
+                  tableHtml += `
+                    <td>
+                      <div class="matrix-qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}">
+                        <button data-act="dec">−</button>
+                        <input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" />
+                        <button data-act="inc">+</button>
+                      </div>
+                      ${priceDiff ? `<div class="price-note">+$${v.price - minPrice}</div>` : ''}
+                      ${stockNote}
+                    </td>
+                  `;
+                }
               } else {
                 tableHtml += '<td style="color:var(--ink-faint)">—</td>';
               }
@@ -695,16 +828,23 @@ function renderCatalog() {
     root.appendChild(catEl);
   });
 
-  // Bind qty controls (all types use same data-variant pattern)
+  // Bind qty controls (with max limit check)
   root.querySelectorAll('[data-variant] button').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const parent = btn.closest('[data-variant]');
       const id = parent.dataset.variant;
       const input = parent.querySelector('input');
+      const max = parent.dataset.max;
+      const maxNum = max && max !== '' ? parseInt(max) : Infinity;
       const cur = qtyMap[id] || 0;
-      qtyMap[id] = btn.dataset.act === 'inc' ? cur + 1 : Math.max(0, cur - 1);
-      input.value = qtyMap[id];
+      let next = btn.dataset.act === 'inc' ? cur + 1 : Math.max(0, cur - 1);
+      if (next > maxNum) {
+        next = maxNum;
+        flashLimit(parent, maxNum);
+      }
+      qtyMap[id] = next;
+      input.value = next;
       onQtyChange();
     });
   });
@@ -712,10 +852,25 @@ function renderCatalog() {
     inp.addEventListener('click', e => e.stopPropagation());
     inp.addEventListener('input', e => {
       const id = e.target.dataset.variantInput;
-      qtyMap[id] = Math.max(0, parseInt(e.target.value) || 0);
+      const parent = e.target.closest('[data-variant]');
+      const max = parent.dataset.max;
+      const maxNum = max && max !== '' ? parseInt(max) : Infinity;
+      let next = Math.max(0, parseInt(e.target.value) || 0);
+      if (next > maxNum) {
+        next = maxNum;
+        e.target.value = next;
+        flashLimit(parent, maxNum);
+      }
+      qtyMap[id] = next;
       onQtyChange();
     });
   });
+
+function flashLimit(parent, max) {
+  parent.style.borderColor = 'var(--danger)';
+  parent.style.transition = 'border-color .3s';
+  setTimeout(() => { parent.style.borderColor = ''; }, 600);
+}
 }
 
 function onQtyChange() {
