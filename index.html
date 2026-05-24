@@ -389,8 +389,59 @@
   .modal .order-no { font-family: var(--mono); color: var(--accent); background: var(--bg); padding: 8px 14px; display: inline-block; margin: 8px 0 20px; border: 1px dashed var(--line); font-size: 13px; }
   .modal a.line-btn { display: block; background: #06c755; color: #fff; padding: 16px; font-family: var(--display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
   .modal a.line-btn:hover { background: #05a847; }
+  .modal .continue-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .modal .continue-btn:hover {
+    background: rgba(254,225,0,.1);
+  }
+  .modal .continue-icon { font-size: 16px; }
+  .modal-foot-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    letter-spacing: .02em;
+  }
 
-  .err-banner { display: none; background: rgba(255,58,94,.1); border: 1px solid var(--danger); color: var(--danger); padding: 12px 16px; font-size: 13px; margin-top: 16px; font-family: var(--mono); }
+
+
+  /* ── 送出前警告 ─────────────────────────────────── */
+  .warning-notice {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: linear-gradient(90deg, rgba(255,149,0,.1), rgba(255,149,0,.03));
+    border: 1px solid var(--accent-2);
+    border-left: 3px solid var(--accent-2);
+    padding: 14px 16px;
+    margin-top: 20px;
+  }
+  .warning-icon {
+    font-size: 18px; flex-shrink: 0; line-height: 1.3;
+  }
+  .warning-text {
+    display: flex; flex-direction: column; gap: 2px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .warning-text b {
+    color: var(--accent-2);
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  .warning-text span { color: var(--ink-dim); }
+
+    .err-banner { display: none; background: rgba(255,58,94,.1); border: 1px solid var(--danger); color: var(--danger); padding: 12px 16px; font-size: 13px; margin-top: 16px; font-family: var(--mono); }
   .err-banner.show { display: block; }
 
   footer { margin-top: 60px; padding: 30px 0; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-dim); letter-spacing: .1em; text-align: center; }
@@ -506,6 +557,14 @@
 
     <div class="err-banner" id="errBanner"></div>
 
+    <div class="warning-notice">
+      <span class="warning-icon">⚠️</span>
+      <div class="warning-text">
+        <b>送出前請確認</b>
+        <span>訂單一旦送出便無法修改</span>
+      </div>
+    </div>
+
     <div class="submit-area">
       <button class="submit" id="submitBtn" disabled>
         送出訂單 <span class="arrow">→</span>
@@ -530,6 +589,10 @@
     <a class="line-btn" href="https://lin.ee/Wsdtetl" target="_blank" rel="noopener">
       前往 LINE 確認匯款 →
     </a>
+    <button class="continue-btn" id="continueBtn">
+      <span class="continue-icon">🛒</span> 我還想再買其他商品
+    </button>
+    <p class="modal-foot-note">⚠ 送出後的訂單無法修改，如需更改請洽 LINE</p>
   </div>
 </div>
 
@@ -1055,6 +1118,14 @@ function showError(msg) {
   errBanner.classList.add('show');
   errBanner.scrollIntoView({behavior:'smooth', block:'center'});
 }
+
+// 再次購物按鈕
+document.getElementById('continueBtn').addEventListener('click', () => {
+  document.getElementById('modalBg').classList.remove('open');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // 重新載入商品（含最新庫存）
+  loadCatalog();
+});
 
 function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({
