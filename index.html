@@ -583,6 +583,69 @@
     font-family: var(--mono);
     font-weight: 700;
   }
+  /* ── 圖片燈箱（放大看圖）─────────────────────── */
+  .lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.92);
+    z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border: 1px solid var(--line);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    width: 44px; height: 44px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all .15s;
+    z-index: 10000;
+  }
+  .lightbox-close:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  /* ── 尺寸表連結 ─────────────────────────────── */
+  .size-chart-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 8px;
+    padding: 5px 10px;
+    background: rgba(254,225,0,.08);
+    border: 1px solid var(--line);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: all .15s;
+    width: fit-content;
+  }
+  .size-chart-link:hover {
+    background: rgba(254,225,0,.15);
+    border-color: var(--accent);
+  }
+  .size-chart-link::before {
+    content: "📐";
+    font-size: 13px;
+  }
+  .size-chart-link::after {
+    content: "↗";
+    font-size: 12px;
+    margin-left: 2px;
+  }
+
 
     .modal a.line-btn { display: block; background: #06c755; color: #fff; padding: 16px; font-family: var(--display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
   .modal a.line-btn:hover { background: #05a847; }
@@ -860,6 +923,12 @@
     NID RUN CLUB · 2026 · POWERED BY THE PACE
   </footer>
 
+</div>
+
+<!-- 圖片燈箱（放大看圖用）-->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" type="button">✕</button>
+  <img id="lightboxImg" src="" alt="" />
 </div>
 
 <div class="modal-bg" id="modalBg">
@@ -1158,12 +1227,22 @@ function renderCatalog() {
           });
           tableHtml += '</tbody></table>';
 
+          // 偵測尺寸表
+          let sizeChartUrl = '';
+          if (item.name.includes('T-shirt') || item.name.includes('T恤') || item.name.includes('T 恤')) {
+            sizeChartUrl = 'nid-tshirt-size.jpg';
+          } else if (item.name.includes('背心')) {
+            sizeChartUrl = 'nid-tank-size.jpg';
+          }
+          const sizeChartLink = sizeChartUrl ? `<div class="size-chart-link" data-img="${sizeChartUrl}" data-alt="${escapeHtml(item.name)} 尺寸表">查看尺寸表</div>` : '';
+          
           itemEl.innerHTML = `
             <div class="item-header">
               <div class="item-info">
                 <div class="item-name">${escapeHtml(item.name)}</div>
                 ${item.desc ? `<div class="item-desc">${escapeHtml(item.desc)}</div>` : ''}
                 <div class="item-price-range">${getPriceDisplay(item)}</div>
+                ${sizeChartLink}
               </div>
             </div>
             <div class="variant-matrix">
@@ -1443,7 +1522,27 @@ document.getElementById('continueBtn').addEventListener('click', () => {
   document.getElementById('modalBg').classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // 重新載入商品（含最新庫存）
-  // 複製帳號
+  // 圖片燈箱
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('.size-chart-link');
+  if (link) {
+    lightboxImg.src = link.dataset.img;
+    lightboxImg.alt = link.dataset.alt || '';
+    lightbox.classList.add('open');
+  }
+});
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+document.getElementById('lightboxClose').addEventListener('click', (e) => {
+  e.stopPropagation();
+  lightbox.classList.remove('open');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') lightbox.classList.remove('open');
+});
+
+// 複製帳號
 const bankCopyBtn = document.getElementById('bankCopyBtn');
 if (bankCopyBtn) {
   bankCopyBtn.addEventListener('click', async () => {
@@ -1482,6 +1581,26 @@ function escapeHtml(str) {
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[m]));
 }
+
+// 圖片燈箱
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('.size-chart-link');
+  if (link) {
+    lightboxImg.src = link.dataset.img;
+    lightboxImg.alt = link.dataset.alt || '';
+    lightbox.classList.add('open');
+  }
+});
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+document.getElementById('lightboxClose').addEventListener('click', (e) => {
+  e.stopPropagation();
+  lightbox.classList.remove('open');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') lightbox.classList.remove('open');
+});
 
 // 複製帳號
 const bankCopyBtn = document.getElementById('bankCopyBtn');
