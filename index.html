@@ -533,12 +533,22 @@
   .field.full { grid-column: 1 / -1; }
   label { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); letter-spacing: .12em; text-transform: uppercase; }
   label .req { color: var(--accent-2); }
-  input[type=text], input[type=tel], select { background: var(--bg-card); border: 1px solid var(--line); color: var(--ink); padding: 12px 14px; font-family: var(--tc); font-size: 15px; transition: border-color .15s, background .15s; width: 100%; }
+  input[type=text], input[type=tel], input[type=email], select { background: var(--bg-card); border: 1px solid var(--line); color: var(--ink); padding: 12px 14px; font-family: var(--tc); font-size: 15px; transition: border-color .15s, background .15s; width: 100%; }
   select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23FEE100' d='M6 8L0 0h12z'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
   select:disabled { color: var(--ink-faint); cursor: not-allowed; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%235a5a55' d='M6 8L0 0h12z'/></svg>"); }
   option { background: var(--bg-card); color: var(--ink); }
   input:focus, select:focus { outline: 0; border-color: var(--accent); background: var(--bg-elev); }
   input::placeholder { color: #4a4a45; }
+
+  /* 抑制瀏覽器自動填寫造成的白底樣式 */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset !important;
+    -webkit-text-fill-color: var(--ink) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   .hint { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
 
   .submit-area { margin-top: 32px; }
