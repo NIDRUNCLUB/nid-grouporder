@@ -1259,6 +1259,15 @@ function onQtyChange() {
     const id = cell.dataset.variant;
     cell.classList.toggle('has-qty', (qtyMap[id] || 0) > 0);
   });
+
+  // 檢查是否有需要配送的品項，顯示/隱藏配送區塊
+  const hasShipping = Object.keys(qtyMap).some(id => {
+    return qtyMap[id] > 0 && variantLookup[id] && variantLookup[id].variant.needShipping;
+  });
+  const shippingBlock = document.getElementById('shippingBlock');
+  if (shippingBlock) {
+    shippingBlock.style.display = hasShipping ? 'block' : 'none';
+  }
 }
 
 function renderSummary() {
