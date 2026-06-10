@@ -45,6 +45,98 @@
   .meta-strip > div { background: var(--bg); padding: 12px 14px; }
   .meta-strip .k { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); letter-spacing: .15em; text-transform: uppercase; }
   .meta-strip .v { font-family: var(--mono); font-size: 14px; color: var(--ink); margin-top: 4px; font-weight: 700; }
+  /* ── 匯款資訊區塊 ─────────────────────────────── */
+  .bank-info {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-elev));
+    border: 1px solid var(--accent);
+    border-left: 3px solid var(--accent);
+    padding: 16px 18px;
+  }
+  .bank-info-head {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .bank-icon {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .bank-title {
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .bank-hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-2);
+    margin-left: auto;
+    letter-spacing: .02em;
+  }
+  .bank-rows {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .bank-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px;
+  }
+  .bank-k {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    width: 50px;
+    flex-shrink: 0;
+  }
+  .bank-v {
+    color: var(--ink);
+    flex: 1;
+    font-weight: 500;
+  }
+  .bank-account {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .bank-account span {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 16px;
+    letter-spacing: .04em;
+  }
+  .bank-copy {
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .bank-copy:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .bank-copy.copied {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .bank-hint { width: 100%; margin-left: 0; }
+    .bank-row { flex-wrap: wrap; }
+    .bank-account span { font-size: 14px; }
+  }
+
 
   .loading-screen { padding: 60px 0; text-align: center; font-family: var(--mono); color: var(--ink-dim); font-size: 13px; letter-spacing: .1em; }
   .loading-screen .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
@@ -160,6 +252,25 @@
     letter-spacing: .1em;
   }
   .variant-row.sold-out .sold-out-label { display: inline; }
+  /* ── 配送標籤 ─────────────────────────────────── */
+  .ship-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    background: rgba(255,149,0,.15);
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    margin-left: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .variant-row.has-shipping {
+    background: linear-gradient(90deg, rgba(255,149,0,.04), transparent);
+  }
+
   
   /* 矩陣表格的售完處理 */
   .matrix-cell-soldout {
@@ -173,6 +284,67 @@
     margin-top: 3px;
   }
   .matrix-cell-stock.normal { color: var(--ink-faint); }
+  /* ── 矩陣水平捲動 ─────────────────────────────── */
+  .matrix-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -14px;
+    padding: 0 14px;
+    /* 視覺暗示：右側有更多內容 */
+    background:
+      linear-gradient(90deg, var(--bg-card) 30%, rgba(20,20,20,0)),
+      linear-gradient(90deg, rgba(20,20,20,0), var(--bg-card) 70%) 100% 0,
+      radial-gradient(farthest-side at 0 50%, rgba(254,225,0,.15), rgba(0,0,0,0)),
+      radial-gradient(farthest-side at 100% 50%, rgba(254,225,0,.15), rgba(0,0,0,0)) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 28px 100%, 28px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+  .matrix-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+  .matrix-scroll::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  .matrix-scroll::-webkit-scrollbar-thumb {
+    background: var(--line);
+  }
+  .matrix-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+  .matrix-table {
+    min-width: 480px; /* 強制最小寬度，避免擠壓 */
+  }
+  .matrix-table th.row-head,
+  .matrix-table td.color-cell {
+    position: sticky;
+    left: 0;
+    background: var(--bg-card);
+    z-index: 1;
+    white-space: nowrap;
+    padding-right: 14px;
+  }
+  .matrix-table th.row-head {
+    background: var(--bg-card);
+  }
+  .scroll-hint {
+    display: none;
+    margin-left: 10px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--accent-2); letter-spacing: 0;
+    text-transform: none;
+    font-weight: 700;
+    animation: pulseHint 2s ease-in-out infinite;
+  }
+  @keyframes pulseHint {
+    0%, 100% { opacity: .5; }
+    50% { opacity: 1; }
+  }
+  @media (max-width: 640px) {
+    .scroll-hint { display: inline-block; }
+    .variant-matrix-title { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  }
+
 
 
   .brand-card.open .items { display: block; }
@@ -387,7 +559,32 @@
   .modal h3 { font-family: var(--display); font-size: 30px; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 10px; }
   .modal p { color: var(--ink-dim); font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
   .modal .order-no { font-family: var(--mono); color: var(--accent); background: var(--bg); padding: 8px 14px; display: inline-block; margin: 8px 0 20px; border: 1px dashed var(--line); font-size: 13px; }
-  .modal a.line-btn { display: block; background: #06c755; color: #fff; padding: 16px; font-family: var(--display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
+
+  .modal-bank-reminder {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    margin: 16px 0;
+    text-align: left;
+  }
+  .modal-bank-row {
+    display: flex; gap: 10px;
+    font-size: 13px;
+    padding: 3px 0;
+  }
+  .modal-bank-row span {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-dim); letter-spacing: .08em;
+    width: 40px; flex-shrink: 0;
+  }
+  .modal-bank-row b {
+    color: var(--ink);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+
+    .modal a.line-btn { display: block; background: #06c755; color: #fff; padding: 16px; font-family: var(--display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
   .modal a.line-btn:hover { background: #05a847; }
   .modal .continue-btn {
     width: 100%;
@@ -441,6 +638,42 @@
   }
   .warning-text span { color: var(--ink-dim); }
 
+  
+  /* ── 配送地址區塊 ─────────────────────────────── */
+  .shipping-block {
+    margin-top: 24px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(255,149,0,.06), rgba(255,149,0,.02));
+    border: 1px solid var(--accent-2);
+    border-left: 3px solid var(--accent-2);
+  }
+  .shipping-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .shipping-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .shipping-title {
+    font-family: var(--display);
+    font-size: 18px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .shipping-sub {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
     .err-banner { display: none; background: rgba(255,58,94,.1); border: 1px solid var(--danger); color: var(--danger); padding: 12px 16px; font-size: 13px; margin-top: 16px; font-family: var(--mono); }
   .err-banner.show { display: block; }
 
@@ -459,11 +692,11 @@
     .brand-head { padding: 14px 16px; gap: 10px; }
     .item { padding: 14px; }
     .item-header { flex-wrap: wrap; }
-    .matrix-table { font-size: 12px; }
-    .matrix-table th { padding: 6px 3px; }
-    .matrix-table td { padding: 4px 2px; }
-    .matrix-qty button { width: 24px; height: 24px; }
-    .matrix-qty input { width: 26px; height: 24px; }
+    .matrix-table { font-size: 12px; min-width: 420px; }
+    .matrix-table th { padding: 6px 8px; }
+    .matrix-table td { padding: 4px 6px; }
+    .matrix-qty button { width: 26px; height: 26px; }
+    .matrix-qty input { width: 30px; height: 26px; }
   }
 </style>
 </head>
@@ -480,6 +713,31 @@
       <div><div class="k">Round</div><div class="v" id="metaRound">— —</div></div>
       <div><div class="k">Deadline</div><div class="v" id="metaDeadline">— —</div></div>
       <div><div class="k">Pickup</div><div class="v" id="metaPickup">— —</div></div>
+    </div>
+
+    <div class="bank-info">
+      <div class="bank-info-head">
+        <span class="bank-icon">$</span>
+        <span class="bank-title">匯款資訊</span>
+        <span class="bank-hint">請先匯款再下單，並填寫後五碼</span>
+      </div>
+      <div class="bank-rows">
+        <div class="bank-row">
+          <div class="bank-k">戶名</div>
+          <div class="bank-v">江凱為</div>
+        </div>
+        <div class="bank-row">
+          <div class="bank-k">銀行</div>
+          <div class="bank-v">822 中國信託銀行（瑞光分行）</div>
+        </div>
+        <div class="bank-row">
+          <div class="bank-k">帳號</div>
+          <div class="bank-v bank-account">
+            <span id="bankAccount">7165-4022-7006</span>
+            <button class="bank-copy" id="bankCopyBtn" type="button">複製</button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -554,6 +812,31 @@
       </div>
     </div>
 
+    <!-- 配送地址（有整箱配送品項時才顯示）-->
+    <div class="shipping-block" id="shippingBlock" style="display:none">
+      <div class="shipping-head">
+        <span class="shipping-icon">🚚</span>
+        <div>
+          <div class="shipping-title">配送資訊</div>
+          <div class="shipping-sub">你的訂單包含整箱直送品項，請填寫廠商直送的收件資訊</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="shipName">收件人姓名 <span class="req">*</span></label>
+          <input type="text" id="shipName" placeholder="王小明" />
+        </div>
+        <div class="field">
+          <label for="shipPhone">收件人電話 <span class="req">*</span></label>
+          <input type="tel" id="shipPhone" placeholder="0912-345-678" />
+        </div>
+        <div class="field full">
+          <label for="shipAddress">收件地址 <span class="req">*</span></label>
+          <input type="text" id="shipAddress" placeholder="例：台北市內湖區瑞光路 100 號 5 樓" />
+        </div>
+      </div>
+    </div>
+
     <div class="err-banner" id="errBanner"></div>
 
     <div class="warning-notice">
@@ -584,6 +867,11 @@
     <h3>訂單已送出</h3>
     <p>感謝你的下單！</p>
     <div class="order-no" id="orderNo">#NID-000000</div>
+    <div class="modal-bank-reminder">
+      <div class="modal-bank-row"><span>戶名</span><b>江凱為</b></div>
+      <div class="modal-bank-row"><span>銀行</span><b>822 中國信託（瑞光）</b></div>
+      <div class="modal-bank-row"><span>帳號</span><b style="color:var(--accent)">7165-4022-7006</b></div>
+    </div>
     <p>📬 訂單明細已寄到你的信箱<br><br>請點擊下方按鈕加入 <b style="color:#06c755">NID 官方 LINE</b><br>主辦人會與你確認匯款狀態</p>
     <a class="line-btn" href="https://lin.ee/Wsdtetl" target="_blank" rel="noopener">
       前往 LINE 確認匯款 →
@@ -762,6 +1050,7 @@ function renderCatalog() {
         if (isSimple) {
           // ─── 單純品項，只要數量 ───
           const v = item.variants[0];
+          const shipBadge = v.needShipping ? '<span class="ship-badge">🚚 整箱直送到府</span>' : '';
           bodyHtml = `
             <div class="item-simple-qty">
               <div class="qty" data-variant="${v.id}">
@@ -774,7 +1063,7 @@ function renderCatalog() {
           itemEl.innerHTML = `
             <div class="item-header">
               <div class="item-info">
-                <div class="item-name">${escapeHtml(item.name)}</div>
+                <div class="item-name">${escapeHtml(item.name)} ${shipBadge}</div>
                 ${item.desc ? `<div class="item-desc">${escapeHtml(item.desc)}</div>` : ''}
                 <div class="item-price-range">${getPriceDisplay(item)}</div>
               </div>
@@ -787,12 +1076,14 @@ function renderCatalog() {
             const stockHtml = renderStockBadge(v);
             const soldOut = v.hasLimit && v.remaining <= 0;
             const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
+            const shipBadge = v.needShipping ? '<span class="ship-badge">🚚 整箱直送到府</span>' : '';
             return `
-              <div class="variant-row ${soldOut ? 'sold-out' : ''}" data-variant-row="${v.id}">
+              <div class="variant-row ${soldOut ? 'sold-out' : ''} ${v.needShipping ? 'has-shipping' : ''}" data-variant-row="${v.id}">
                 <div class="variant-label">
                   <span class="variant-tag">${escapeHtml(v.opt1)}</span>
                   <span class="variant-price">NT$ ${v.price}</span>
                   ${stockHtml}
+                  ${shipBadge}
                   <span class="sold-out-label">已售完</span>
                 </div>
                 <div class="qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}">
@@ -875,8 +1166,11 @@ function renderCatalog() {
               </div>
             </div>
             <div class="variant-matrix">
-              <div class="variant-matrix-title">選擇顏色 + 尺寸（每格可填數量）</div>
-              ${tableHtml}
+              <div class="variant-matrix-title">
+                選擇顏色 + 尺寸（每格可填數量）
+                <span class="scroll-hint">← 左右滑動查看更多 →</span>
+              </div>
+              <div class="matrix-scroll">${tableHtml}</div>
             </div>
           `;
         }
@@ -1046,6 +1340,18 @@ submitBtn.addEventListener('click', async () => {
     showError('匯款後五碼必須是 5 位數字');
     return;
   }
+  
+  // 驗證配送資訊（如有需要配送的品項）
+  const hasShippingItems = Object.keys(qtyMap).some(id => {
+    return qtyMap[id] > 0 && variantLookup[id] && variantLookup[id].variant.needShipping;
+  });
+  const shipName = document.getElementById('shipName').value.trim();
+  const shipPhone = document.getElementById('shipPhone').value.trim();
+  const shipAddress = document.getElementById('shipAddress').value.trim();
+  if (hasShippingItems && (!shipName || !shipPhone || !shipAddress)) {
+    showError('您的訂單包含整箱直送品項，請填寫完整的配送資訊（收件人 / 電話 / 地址）');
+    return;
+  }
 
   const items = [];
   let total = 0;
@@ -1063,7 +1369,8 @@ submitBtn.addEventListener('click', async () => {
         variant: variantStr,
         qty: q,
         unitPrice: variant.price,
-        subtotal: variant.price * q
+        subtotal: variant.price * q,
+        needShipping: !!variant.needShipping
       });
       total += variant.price * q;
     }
@@ -1076,7 +1383,10 @@ submitBtn.addEventListener('click', async () => {
     timestamp: new Date().toISOString(),
     name, phone, email, region, classname, last5, note,
     items,
-    total
+    total,
+    shipName: hasShippingItems ? shipName : '',
+    shipPhone: hasShippingItems ? shipPhone : '',
+    shipAddress: hasShippingItems ? shipAddress : ''
   };
 
   submitBtn.classList.add('loading');
@@ -1098,7 +1408,8 @@ submitBtn.addEventListener('click', async () => {
     document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('has-items'));
     document.querySelectorAll('.variant-row').forEach(r => r.classList.remove('has-qty'));
     document.querySelectorAll('.matrix-qty').forEach(c => c.classList.remove('has-qty'));
-    ['name','phone','email','last5','note'].forEach(id => document.getElementById(id).value = '');
+    ['name','phone','email','last5','note','shipName','shipPhone','shipAddress'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('shippingBlock').style.display = 'none';
     regionEl.value = '';
     classEl.innerHTML = '<option value="">請先選擇區域</option>';
     classEl.disabled = true;
@@ -1122,13 +1433,75 @@ document.getElementById('continueBtn').addEventListener('click', () => {
   document.getElementById('modalBg').classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // 重新載入商品（含最新庫存）
-  loadCatalog();
+  // 複製帳號
+const bankCopyBtn = document.getElementById('bankCopyBtn');
+if (bankCopyBtn) {
+  bankCopyBtn.addEventListener('click', async () => {
+    const account = document.getElementById('bankAccount').textContent.replace(/-/g, '');
+    try {
+      await navigator.clipboard.writeText(account);
+      bankCopyBtn.textContent = '已複製 ✓';
+      bankCopyBtn.classList.add('copied');
+      setTimeout(() => {
+        bankCopyBtn.textContent = '複製';
+        bankCopyBtn.classList.remove('copied');
+      }, 2000);
+    } catch (err) {
+      // 舊瀏覽器 fallback
+      const tmp = document.createElement('input');
+      tmp.value = account;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      document.body.removeChild(tmp);
+      bankCopyBtn.textContent = '已複製 ✓';
+      bankCopyBtn.classList.add('copied');
+      setTimeout(() => {
+        bankCopyBtn.textContent = '複製';
+        bankCopyBtn.classList.remove('copied');
+      }, 2000);
+    }
+  });
+}
+
+loadCatalog();
 });
 
 function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[m]));
+}
+
+// 複製帳號
+const bankCopyBtn = document.getElementById('bankCopyBtn');
+if (bankCopyBtn) {
+  bankCopyBtn.addEventListener('click', async () => {
+    const account = document.getElementById('bankAccount').textContent.replace(/-/g, '');
+    try {
+      await navigator.clipboard.writeText(account);
+      bankCopyBtn.textContent = '已複製 ✓';
+      bankCopyBtn.classList.add('copied');
+      setTimeout(() => {
+        bankCopyBtn.textContent = '複製';
+        bankCopyBtn.classList.remove('copied');
+      }, 2000);
+    } catch (err) {
+      // 舊瀏覽器 fallback
+      const tmp = document.createElement('input');
+      tmp.value = account;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      document.body.removeChild(tmp);
+      bankCopyBtn.textContent = '已複製 ✓';
+      bankCopyBtn.classList.add('copied');
+      setTimeout(() => {
+        bankCopyBtn.textContent = '複製';
+        bankCopyBtn.classList.remove('copied');
+      }, 2000);
+    }
+  });
 }
 
 loadCatalog();
