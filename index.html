@@ -754,12 +754,53 @@
     .brand-head { padding: 14px 16px; gap: 10px; }
     .item { padding: 14px; }
     .item-header { flex-wrap: wrap; }
-    .matrix-table { font-size: 13px; min-width: 540px; width: max-content; }
-    .matrix-table th { padding: 6px 8px; }
-    .matrix-table td { padding: 4px 6px; }
-    .matrix-table th.row-head, .matrix-table td.color-cell { font-size: 12px; }
-    .matrix-qty button { width: 26px; height: 26px; }
-    .matrix-qty input { width: 30px; height: 26px; }
+    
+    /* ── 手機版：矩陣表格轉換成直書列表 ─────────── */
+    .matrix-scroll { overflow: visible; padding: 0; margin: 0; }
+    .matrix-table { display: block; width: 100%; min-width: 0 !important; }
+    .matrix-table thead { display: none; }  /* 隱藏尺寸列標題 */
+    .matrix-table tbody, .matrix-table tr { display: block; width: 100%; }
+    .matrix-table tr { 
+      margin-bottom: 16px; 
+      padding: 12px;
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+    }
+    .matrix-table tr:last-child { margin-bottom: 0; }
+    .matrix-table td { 
+      display: flex; 
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .matrix-table td:last-child { border-bottom: 0; }
+    .matrix-table td.color-cell {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 4px 0 12px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 4px;
+      display: block;
+      text-align: left;
+    }
+    /* 顯示每個尺寸標籤（用 data-label） */
+    .matrix-table td:not(.color-cell):before {
+      content: attr(data-label);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 700;
+      min-width: 40px;
+      text-align: left;
+    }
+    .matrix-table .price-note,
+    .matrix-cell-stock {
+      flex-shrink: 0;
+    }
+    .scroll-hint { display: none !important; }
   }
 </style>
 </head>
@@ -1200,7 +1241,7 @@ function renderCatalog() {
                 const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
                 
                 if (soldOut) {
-                  tableHtml += `<td><div class="matrix-cell-soldout">售完</div></td>`;
+                  tableHtml += `<td data-label="${escapeHtml(s)}"><div class="matrix-cell-soldout">售完</div></td>`;
                 } else {
                   let stockNote = '';
                   if (v.hasLimit) {
@@ -1208,7 +1249,7 @@ function renderCatalog() {
                     stockNote = `<div class="matrix-cell-stock ${cls}">剩 ${v.remaining}</div>`;
                   }
                   tableHtml += `
-                    <td>
+                    <td data-label="${escapeHtml(s)}">
                       <div class="matrix-qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}">
                         <button data-act="dec">−</button>
                         <input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" />
@@ -1220,7 +1261,7 @@ function renderCatalog() {
                   `;
                 }
               } else {
-                tableHtml += '<td style="color:var(--ink-faint)">—</td>';
+                tableHtml += `<td data-label="${escapeHtml(s)}" style="color:var(--ink-faint)">—</td>`;
               }
             });
             tableHtml += '</tr>';
@@ -1246,10 +1287,7 @@ function renderCatalog() {
               </div>
             </div>
             <div class="variant-matrix">
-              <div class="variant-matrix-title">
-                選擇顏色 + 尺寸（每格可填數量）
-                <span class="scroll-hint">← 左右滑動查看更多 →</span>
-              </div>
+              <div class="variant-matrix-title">選擇顏色 + 尺寸（每格可填數量）</div>
               <div class="matrix-scroll">${tableHtml}</div>
             </div>
           `;
