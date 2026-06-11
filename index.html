@@ -644,6 +644,77 @@
     font-size: 12px;
     margin-left: 2px;
   }
+  /* ── 桌面版/手機版切換 ──────────────────────── */
+  .mobile-only { display: none; }
+  @media (max-width: 640px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
+  }
+  
+  /* ── 手機版：顏色 Tab ─────────────────────── */
+  .m-color-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .m-color-tab {
+    flex: 1;
+    min-width: 80px;
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    font-family: var(--tc);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .m-color-tab.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+  
+  /* ── 手機版：尺寸列表 ─────────────────────── */
+  .m-size-panel { display: none; }
+  .m-size-panel.active { display: block; }
+  .m-size-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .m-size-row:last-child { border-bottom: 0; }
+  .m-size-row.sold-out { opacity: .45; }
+  .m-size-label {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 50px;
+  }
+  .m-size-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .m-size-price { color: var(--ink-dim); }
+  .m-size-stock.low { color: var(--accent-2); font-weight: 700; }
+  .m-size-stock.normal { color: var(--ink-faint); }
+  .m-size-soldout {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--danger);
+    font-weight: 700;
+    letter-spacing: .1em;
+  }
+
 
 
     .modal a.line-btn { display: block; background: #06c755; color: #fff; padding: 16px; font-family: var(--display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
@@ -1220,53 +1291,72 @@ function renderCatalog() {
           // ─── 顏色×尺寸矩陣 ───
           const colors = [...new Set(item.variants.map(v => v.opt1))];
           const sizes = [...new Set(item.variants.map(v => v.opt2))];
-          // build cell index
           const cellMap = {};
           item.variants.forEach(v => {
             cellMap[v.opt1 + '|' + v.opt2] = v;
           });
+          const minPrice = Math.min(...item.variants.map(x => x.price));
 
+          // ── 桌面版：矩陣表格 ─────────────────────
           let tableHtml = '<table class="matrix-table"><thead><tr><th class="row-head">顏色 / 尺寸</th>';
           sizes.forEach(s => tableHtml += `<th>${escapeHtml(s)}</th>`);
           tableHtml += '</tr></thead><tbody>';
-          
           colors.forEach(c => {
             tableHtml += `<tr><td class="color-cell">${escapeHtml(c)}</td>`;
             sizes.forEach(s => {
               const v = cellMap[c + '|' + s];
               if (v) {
-                const minPrice = Math.min(...item.variants.map(x => x.price));
                 const priceDiff = v.price !== minPrice;
                 const soldOut = v.hasLimit && v.remaining <= 0;
                 const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
-                
                 if (soldOut) {
-                  tableHtml += `<td data-label="${escapeHtml(s)}"><div class="matrix-cell-soldout">售完</div></td>`;
+                  tableHtml += `<td><div class="matrix-cell-soldout">售完</div></td>`;
                 } else {
                   let stockNote = '';
                   if (v.hasLimit) {
                     const cls = v.remaining <= 3 ? '' : 'normal';
                     stockNote = `<div class="matrix-cell-stock ${cls}">剩 ${v.remaining}</div>`;
                   }
-                  tableHtml += `
-                    <td data-label="${escapeHtml(s)}">
-                      <div class="matrix-qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}">
-                        <button data-act="dec">−</button>
-                        <input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" />
-                        <button data-act="inc">+</button>
-                      </div>
-                      ${priceDiff ? `<div class="price-note">+$${v.price - minPrice}</div>` : ''}
-                      ${stockNote}
-                    </td>
-                  `;
+                  tableHtml += `<td><div class="matrix-qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}"><button data-act="dec">−</button><input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" /><button data-act="inc">+</button></div>${priceDiff ? `<div class="price-note">+$${v.price - minPrice}</div>` : ''}${stockNote}</td>`;
                 }
               } else {
-                tableHtml += `<td data-label="${escapeHtml(s)}" style="color:var(--ink-faint)">—</td>`;
+                tableHtml += '<td style="color:var(--ink-faint)">—</td>';
               }
             });
             tableHtml += '</tr>';
           });
           tableHtml += '</tbody></table>';
+
+          // ── 手機版：顏色 Tab + 尺寸列表 ──────────
+          let mobileHtml = '<div class="m-color-tabs">';
+          colors.forEach((c, idx) => {
+            mobileHtml += `<button class="m-color-tab ${idx === 0 ? 'active' : ''}" data-color="${escapeHtml(c)}" type="button">${escapeHtml(c)}</button>`;
+          });
+          mobileHtml += '</div>';
+          
+          mobileHtml += '<div class="m-size-panels">';
+          colors.forEach((c, idx) => {
+            mobileHtml += `<div class="m-size-panel ${idx === 0 ? 'active' : ''}" data-panel="${escapeHtml(c)}">`;
+            sizes.forEach(s => {
+              const v = cellMap[c + '|' + s];
+              if (!v) return;
+              const priceDiff = v.price !== minPrice;
+              const soldOut = v.hasLimit && v.remaining <= 0;
+              const maxAttr = v.hasLimit ? `max="${v.remaining}"` : '';
+              let stockNote = '';
+              if (v.hasLimit && !soldOut) {
+                const cls = v.remaining <= 3 ? 'low' : 'normal';
+                stockNote = `<span class="m-size-stock ${cls}">剩 ${v.remaining}</span>`;
+              }
+              if (soldOut) {
+                mobileHtml += `<div class="m-size-row sold-out"><span class="m-size-label">${escapeHtml(s)}</span><span class="m-size-info"><span class="m-size-soldout">已售完</span></span></div>`;
+              } else {
+                mobileHtml += `<div class="m-size-row"><span class="m-size-label">${escapeHtml(s)}</span><span class="m-size-info">${priceDiff ? `<span class="m-size-price">+$${v.price - minPrice}</span>` : ''}${stockNote}</span><div class="qty" data-variant="${v.id}" data-max="${v.hasLimit ? v.remaining : ''}"><button data-act="dec">−</button><input type="number" min="0" ${maxAttr} value="0" data-variant-input="${v.id}" /><button data-act="inc">+</button></div></div>`;
+              }
+            });
+            mobileHtml += '</div>';
+          });
+          mobileHtml += '</div>';
 
           // 偵測尺寸表
           let sizeChartUrl = '';
@@ -1286,11 +1376,29 @@ function renderCatalog() {
                 ${sizeChartLink}
               </div>
             </div>
-            <div class="variant-matrix">
+            <div class="variant-matrix desktop-only">
               <div class="variant-matrix-title">選擇顏色 + 尺寸（每格可填數量）</div>
-              <div class="matrix-scroll">${tableHtml}</div>
+              ${tableHtml}
+            </div>
+            <div class="variant-mobile mobile-only">
+              <div class="variant-matrix-title">選擇顏色，再選尺寸與數量</div>
+              ${mobileHtml}
             </div>
           `;
+          
+          // 綁定 tab 切換
+          setTimeout(() => {
+            const tabs = itemEl.querySelectorAll('.m-color-tab');
+            const panels = itemEl.querySelectorAll('.m-size-panel');
+            tabs.forEach(tab => {
+              tab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const color = tab.dataset.color;
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.color === color));
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === color));
+              });
+            });
+          }, 0);
         }
 
         itemsEl.appendChild(itemEl);
