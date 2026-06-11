@@ -459,6 +459,7 @@
   }
   .matrix-table {
     width: 100%;
+    min-width: 480px; /* 強制最小寬度，撐開讓水平捲動生效 */
     border-collapse: collapse;
   }
   .matrix-table th {
@@ -482,6 +483,7 @@
     padding-left: 0;
     color: var(--ink);
     font-size: 13px;
+    white-space: nowrap;
   }
   .matrix-table tr:last-child td { border-bottom: 0; }
   .matrix-table .price-note {
@@ -765,9 +767,10 @@
     .brand-head { padding: 14px 16px; gap: 10px; }
     .item { padding: 14px; }
     .item-header { flex-wrap: wrap; }
-    .matrix-table { font-size: 12px; min-width: 420px; }
+    .matrix-table { font-size: 12px; min-width: 420px !important; }
     .matrix-table th { padding: 6px 8px; }
     .matrix-table td { padding: 4px 6px; }
+    .matrix-table th.row-head, .matrix-table td.color-cell { font-size: 12px; }
     .matrix-qty button { width: 26px; height: 26px; }
     .matrix-qty input { width: 30px; height: 26px; }
   }
