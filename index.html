@@ -1068,22 +1068,33 @@
 <script>
 const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwlUVzwOO66svVI8xgInNZ_cXNcfrm_2H0qWLTGvmOrFAbaryW7d_mpvTOUhpUH5WggKg/exec';
 
-const CLASSES = {
-  '台北/新北': [
-    '週一北田跑步班', '週一中和跑步班', '週一中正初階跑步班', '週一大同初階跑步班', '週一北田跑者養成班',
-    '週二內湖跑步班', '週二龍江跑步班', '週二中正初階跑步班', '週二北田初階跑步班', '週二板一初階跑步班',
-    '週三北田跑步班', '週三板一跑步班', '週三內湖跑步班', '週三北田初階跑步班', '週三新莊初階跑步班', '週三信義初階跑步班',
-    '週四大同跑步班', '週四北田初階跑步班', '週四內湖初階跑步班', '週四板一初階跑步班', '週四中正跑步班(NEW)', '週四龍江跑者養成班',
-    '週五新莊跑步班', '週五北田跑步班', '週五板二初階跑步班', '週五內湖初階跑步班',
-    '週六汐止早跑班', '週六北田初階早跑班', '週六Hyrox訓練營',
-    '週日北田早跑班'
-  ],
-  '高雄': [
-    '週二苓雅初階跑步班', '週二高大初階跑步班(NEW)',
-    '週三高大跑步班', '週三鳳山跑步班(NEW)',
-    '週四苓雅跑步班(NEW)', '週四高大初階跑步班',
-    '週六苓雅早跑班'
-  ]
+const CLASS_DATA = {
+  '跑步班': {
+    '台北/新北': [
+      '週一北田跑步班', '週一中和跑步班', '週一中正初階跑步班', '週一大同初階跑步班', '週一北田跑者養成班',
+      '週二內湖跑步班', '週二龍江跑步班', '週二中正初階跑步班', '週二北田初階跑步班', '週二板一初階跑步班',
+      '週三北田跑步班', '週三板一跑步班', '週三內湖跑步班', '週三北田初階跑步班', '週三新莊初階跑步班', '週三信義初階跑步班',
+      '週四大同跑步班', '週四北田初階跑步班', '週四內湖初階跑步班', '週四板一初階跑步班', '週四中正跑步班(NEW)', '週四龍江跑者養成班',
+      '週五新莊跑步班', '週五北田跑步班', '週五板二初階跑步班', '週五內湖初階跑步班',
+      '週六汐止早跑班', '週六北田初階早跑班', '週六Hyrox訓練營',
+      '週日北田早跑班'
+    ],
+    '高雄': [
+      '週二苓雅初階跑步班', '週二高大初階跑步班(NEW)',
+      '週三高大跑步班', '週三鳳山跑步班(NEW)',
+      '週四苓雅跑步班(NEW)', '週四高大初階跑步班',
+      '週六苓雅早跑班'
+    ]
+  },
+  '肌力班': {
+    '台北/新北': [
+      '週一北田跑者肌力班1830', '週一北田跑者肌力班1930',
+      '週一松江跑者肌力班', '週一北田繩流律動肌力班',
+      '週二北田跑者肌力班1830', '週二北田跑者肌力班1930',
+      '週五大直跑者肌力班',
+      '週六松江跑者肌力班1700'
+    ]
+  }
 };
 
 let CATALOG = [];
@@ -1528,24 +1539,62 @@ function renderSummary() {
   document.getElementById('submitBtn').disabled = total === 0;
 }
 
-/* 區域 → 班級連動 */
+/* 類型 → 區域 → 班級 三段連動 */
+const classtypeEl = document.getElementById('classtype');
+const regionFieldEl = document.getElementById('regionField');
 const regionEl = document.getElementById('region');
 const classEl = document.getElementById('classname');
 
-regionEl.addEventListener('change', () => {
-  const region = regionEl.value;
+function _resetClass(placeholder) {
+  classEl.innerHTML = `<option value="">${placeholder}</option>`;
+  classEl.disabled = true;
+}
+
+function _fillClasses(arr) {
   classEl.innerHTML = '<option value="">請選擇班級</option>';
-  if (region && CLASSES[region]) {
-    CLASSES[region].forEach(cls => {
+  arr.forEach(cls => {
+    const opt = document.createElement('option');
+    opt.value = cls;
+    opt.textContent = cls;
+    classEl.appendChild(opt);
+  });
+  classEl.disabled = false;
+}
+
+classtypeEl.addEventListener('change', () => {
+  const type = classtypeEl.value;
+  if (!type) {
+    regionFieldEl.style.display = 'none';
+    regionEl.value = '';
+    _resetClass('請先選擇類型');
+    return;
+  }
+  const regions = Object.keys(CLASS_DATA[type] || {});
+  if (regions.length > 1) {
+    regionFieldEl.style.display = '';
+    regionEl.innerHTML = '<option value="">請選擇區域</option>';
+    regions.forEach(r => {
       const opt = document.createElement('option');
-      opt.value = cls;
-      opt.textContent = cls;
-      classEl.appendChild(opt);
+      opt.value = r;
+      opt.textContent = r === '台北/新北' ? '台北 / 新北區' : '高雄區';
+      regionEl.appendChild(opt);
     });
-    classEl.disabled = false;
+    regionEl.disabled = false;
+    _resetClass('請先選擇區域');
   } else {
-    classEl.innerHTML = '<option value="">請先選擇區域</option>';
-    classEl.disabled = true;
+    regionFieldEl.style.display = 'none';
+    regionEl.value = regions[0];
+    _fillClasses(CLASS_DATA[type][regions[0]]);
+  }
+});
+
+regionEl.addEventListener('change', () => {
+  const type = classtypeEl.value;
+  const region = regionEl.value;
+  if (type && region && CLASS_DATA[type] && CLASS_DATA[type][region]) {
+    _fillClasses(CLASS_DATA[type][region]);
+  } else {
+    _resetClass('請先選擇區域');
   }
 });
 
@@ -1563,8 +1612,9 @@ submitBtn.addEventListener('click', async () => {
   const last5 = document.getElementById('last5').value.trim();
   const note = document.getElementById('note').value.trim();
 
-  if (!name || !phone || !email || !region || !classname || !last5) {
-    showError('請填寫所有必填欄位（姓名 / 電話 / Email / 區域 / 班級 / 匯款後五碼）');
+  const classtype = classtypeEl.value;
+  if (!name || !phone || !email || !classtype || !region || !classname || !last5) {
+    showError('請填寫所有必填欄位（姓名 / 電話 / Email / 類型 / 區域 / 班級 / 匯款後五碼）');
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -1644,6 +1694,11 @@ submitBtn.addEventListener('click', async () => {
     document.querySelectorAll('.variant-row').forEach(r => r.classList.remove('has-qty'));
     document.querySelectorAll('.matrix-qty').forEach(c => c.classList.remove('has-qty'));
     ['name','phone','email','last5','note','shipName','shipPhone','shipAddress'].forEach(id => document.getElementById(id).value = '');
+    classtypeEl.value = '';
+    regionFieldEl.style.display = 'none';
+    regionEl.innerHTML = '<option value="">請先選擇類型</option>';
+    regionEl.disabled = true;
+    _resetClass('請先選擇類型');
     document.getElementById('shippingBlock').style.display = 'none';
     regionEl.value = '';
     classEl.innerHTML = '<option value="">請先選擇區域</option>';
