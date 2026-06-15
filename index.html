@@ -873,9 +873,91 @@
     }
     .scroll-hint { display: none !important; }
   }
+
+  /* ── 團購已結束畫面 ─────────────────────────── */
+  .closed-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .closed-content {
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+  .closed-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+    line-height: 1;
+  }
+  .closed-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: var(--ink-dim);
+    margin-bottom: 14px;
+  }
+  .closed-title {
+    font-family: var(--display);
+    font-size: clamp(64px, 14vw, 112px);
+    line-height: .9;
+    letter-spacing: -.02em;
+    color: var(--ink);
+    margin: 0 0 24px;
+    text-transform: uppercase;
+  }
+  .closed-msg {
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 0 0 32px;
+  }
+  .closed-sub {
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--line);
+  }
+  .closed-line-btn {
+    display: inline-block;
+    background: #06c755;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 32px;
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background .2s;
+  }
+  .closed-line-btn:hover { background: #05a847; }
+
 </style>
 </head>
 <body>
+
+<!-- 團購已結束畫面（截止後顯示）-->
+<div id="closedScreen" class="closed-screen" style="display:none">
+  <div class="closed-content">
+    <div class="closed-icon">🏃</div>
+    <div class="closed-eyebrow">NID RUN CLUB · GROUP ORDER</div>
+    <h1 class="closed-title">本團已<br>結束</h1>
+    <p class="closed-msg">
+      感謝大家的熱情支持<br>
+      <b style="color:var(--accent)">下季再見</b> 🏁
+    </p>
+    <p class="closed-sub">想第一時間收到下季團購資訊？<br>加入 NID 官方 LINE，我們會主動通知你</p>
+    <a class="closed-line-btn" href="https://lin.ee/Wsdtetl" target="_blank" rel="noopener">
+      加入 NID 官方 LINE →
+    </a>
+  </div>
+</div>
 
 <div class="wrap">
 
@@ -1125,6 +1207,13 @@ async function loadCatalog() {
         variantLookup[v.id] = { variant: v, item: it, brand: b, cat };
       });
     })));
+
+    // 檢查是否已截止
+    if (isClosed(ROUND_INFO.deadline)) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('closedScreen').style.display = 'flex';
+      return;
+    }
 
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('catalog').style.display = 'block';
@@ -1731,6 +1820,50 @@ document.getElementById('continueBtn').addEventListener('click', () => {
   // 重新載入商品（含最新庫存）
   loadCatalog();
 });
+
+// 判斷截止時間是否過了
+function isClosed(deadlineStr) {
+  if (!deadlineStr || deadlineStr === '— —') return false;
+  
+  // 解析截止時間，支援多種格式：
+  // "06/15 23:59" / "2026/06/15 23:59" / "6月15日 23:59" 等
+  try {
+    const now = new Date();
+    const year = now.getFullYear();
+    const str = String(deadlineStr).trim();
+    
+    // 嘗試格式 1: "MM/DD HH:MM" or "M/D HH:MM"
+    let m = str.match(/(\d{1,2})[\/月-](\d{1,2})\D+(\d{1,2}):(\d{2})/);
+    if (m) {
+      const deadline = new Date(year, parseInt(m[1])-1, parseInt(m[2]), parseInt(m[3]), parseInt(m[4]));
+      // 如果截止時間看起來是去年（已經過了 6 個月以上），可能是明年
+      if (deadline.getTime() < now.getTime() - 180*24*60*60*1000) {
+        deadline.setFullYear(year + 1);
+      }
+      return now.getTime() > deadline.getTime();
+    }
+    
+    // 嘗試格式 2: "YYYY/MM/DD HH:MM"
+    m = str.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})\D+(\d{1,2}):(\d{2})/);
+    if (m) {
+      const deadline = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]), parseInt(m[4]), parseInt(m[5]));
+      return now.getTime() > deadline.getTime();
+    }
+    
+    // 嘗試格式 3: "MM/DD"（沒時間，預設當天 23:59）
+    m = str.match(/(\d{1,2})[\/月-](\d{1,2})/);
+    if (m) {
+      const deadline = new Date(year, parseInt(m[1])-1, parseInt(m[2]), 23, 59);
+      if (deadline.getTime() < now.getTime() - 180*24*60*60*1000) {
+        deadline.setFullYear(year + 1);
+      }
+      return now.getTime() > deadline.getTime();
+    }
+  } catch (err) {
+    console.error('解析截止時間失敗', err);
+  }
+  return false;
+}
 
 function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({
