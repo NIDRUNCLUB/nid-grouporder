@@ -1729,58 +1729,7 @@ document.getElementById('continueBtn').addEventListener('click', () => {
   document.getElementById('modalBg').classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // 重新載入商品（含最新庫存）
-  // 圖片燈箱
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
-document.addEventListener('click', (e) => {
-  const link = e.target.closest('.size-chart-link');
-  if (link) {
-    lightboxImg.src = link.dataset.img;
-    lightboxImg.alt = link.dataset.alt || '';
-    lightbox.classList.add('open');
-  }
-});
-lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
-document.getElementById('lightboxClose').addEventListener('click', (e) => {
-  e.stopPropagation();
-  lightbox.classList.remove('open');
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') lightbox.classList.remove('open');
-});
-
-// 複製帳號
-const bankCopyBtn = document.getElementById('bankCopyBtn');
-if (bankCopyBtn) {
-  bankCopyBtn.addEventListener('click', async () => {
-    const account = document.getElementById('bankAccount').textContent.replace(/-/g, '');
-    try {
-      await navigator.clipboard.writeText(account);
-      bankCopyBtn.textContent = '已複製 ✓';
-      bankCopyBtn.classList.add('copied');
-      setTimeout(() => {
-        bankCopyBtn.textContent = '複製';
-        bankCopyBtn.classList.remove('copied');
-      }, 2000);
-    } catch (err) {
-      // 舊瀏覽器 fallback
-      const tmp = document.createElement('input');
-      tmp.value = account;
-      document.body.appendChild(tmp);
-      tmp.select();
-      document.execCommand('copy');
-      document.body.removeChild(tmp);
-      bankCopyBtn.textContent = '已複製 ✓';
-      bankCopyBtn.classList.add('copied');
-      setTimeout(() => {
-        bankCopyBtn.textContent = '複製';
-        bankCopyBtn.classList.remove('copied');
-      }, 2000);
-    }
-  });
-}
-
-loadCatalog();
+  loadCatalog();
 });
 
 function escapeHtml(str) {
