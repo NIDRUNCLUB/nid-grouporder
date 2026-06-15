@@ -964,17 +964,23 @@
         <div class="hint">訂單確認信會寄到這個信箱</div>
       </div>
       <div class="field">
+        <label for="classtype">類型 <span class="req">*</span></label>
+        <select id="classtype">
+          <option value="">請選擇類型</option>
+          <option value="跑步班">跑步班</option>
+          <option value="肌力班">肌力班</option>
+        </select>
+      </div>
+      <div class="field" id="regionField" style="display:none">
         <label for="region">所在區域 <span class="req">*</span></label>
-        <select id="region">
-          <option value="">請選擇區域</option>
-          <option value="台北/新北">台北 / 新北區</option>
-          <option value="高雄">高雄區</option>
+        <select id="region" disabled>
+          <option value="">請先選擇類型</option>
         </select>
       </div>
       <div class="field">
         <label for="classname">班級 <span class="req">*</span></label>
         <select id="classname" disabled>
-          <option value="">請先選擇區域</option>
+          <option value="">請先選擇類型</option>
         </select>
       </div>
       <div class="field full">
